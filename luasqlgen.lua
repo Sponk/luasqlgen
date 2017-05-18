@@ -511,7 +511,7 @@ private:
 
 file:write("};\n}\n") -- Close file and namespace
 file:close()
-sqlfile.close()
+sqlfile:close()
 
 local testfile = io.open(description.name .. "Test.cpp", "w")
 testfile:write([[
