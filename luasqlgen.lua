@@ -2,6 +2,13 @@ if #arg == 0 then
    os.exit(0)
 end
 
+function scriptPath()
+   local str = debug.getinfo(2, "S").source:sub(2)
+   return str:match("(.*/)")
+end
+
+print(scriptPath())
+
 --
 -- Stuff to ensure alphabetic order
 -- Taken from http://lua-users.org/wiki/SortedIteration
@@ -57,7 +64,10 @@ function orderedPairs(t)
    return orderedNext, t, nil
 end
 
-local maria = require("sqlite")
+local maria = dofile(scriptPath() .. "sqlite.lua")
+maria:process(arg[1])
+
+maria = dofile(scriptPath() .. "mariadb.lua")
 maria:process(arg[1])
 
 local description = dofile(arg[1])

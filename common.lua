@@ -10,11 +10,12 @@ function Common:generateCreateFunction(db, file, name, tbl)
    
    local i = 0;
    for p,q in orderedPairs(tbl) do
-      file:write("\t\t" .. db:setStatementArg(stmtName, i, p, q) .. "\n")
+      file:write("\t\t" .. db:setStatementArg(stmtName, i, "self." .. p, q) .. "\n")
       i = i + 1
    end
 
    file:write("\t\t" .. db:generateInsert(stmtName, "self.id") .. "\n")
+   file:write("\t\t" .. db:generateStmtReset(stmtName) .. "\n")
    --file:write("\t\tself.id = " .. stmtName .. "->insert();\n")
    file:write("\t}\n")
 end
@@ -28,13 +29,14 @@ function Common:generateUpdateFunction(db, file, name, tbl)
 
    local i = 0;
    for p,q in orderedPairs(tbl) do
-      file:write("\t\t" .. db:setStatementArg(stmtName, i, p, q) .. "\n")
+      file:write("\t\t" .. db:setStatementArg(stmtName, i, "self." .. p, q) .. "\n")
       i = i + 1
    end
 
 
    file:write("\t\t" .. db:setStatementArg(stmtName, i, "self.id", "unsigned64") .. "\n")
    file:write("\t\t" .. db:generateExecute(stmtName) .. "\n")
+   file:write("\t\t" .. db:generateStmtReset(stmtName) .. "\n")
    file:write("\t}\n")
 end
 
@@ -47,6 +49,7 @@ function Common:generateDeleteFunction(db, file, name, tbl)
    file:write("\t\t" .. db:setStatementArg(stmtName, 0, "id", "uint64") .. "\n")
 
    file:write("\t\t" .. db:generateExecute(stmtName) .. "\n")
+   file:write("\t\t" .. db:generateStmtReset(stmtName) .. "\n")
    file:write("\t}\n")
 end
 
@@ -63,9 +66,10 @@ function Common:generateGetFunction(db, file, name, tbl)
    file:write("\t\tobject.id = id;")
 
    for p,q in orderedPairs(tbl) do
-      file:write("\t\t" .. db:getStatementResult("result", p, "object." .. p, q) .. "\n")
+      file:write("\t\t" .. db:getStatementResult("result", p, "object." .. p, q, stmtName) .. "\n")
    end
 
+   file:write("\t\t" .. db:generateStmtReset(stmtName) .. "\n")
    file:write("\t\treturn true;\n\t}\n")
 end
 
@@ -94,14 +98,14 @@ function Common:generateQueryFunction(db, file, name, tbl)
 
 
    file:write("\t\t" .. db:generateRowLoop("result", stmtName) .. "\n\t\t{\n")
-   file:write("\t\t\t" .. db:getStatementResult("result", "id", "object.id", "uint64") .. "\n")
+   file:write("\t\t\t" .. db:getStatementResult("result", "id", "object.id", "uint64", stmtName) .. "\n")
    
    for p,q in orderedPairs(tbl) do
-      file:write("\t\t" .. db:getStatementResult("result", p, "object." .. p, q) .. "\n")
+      file:write("\t\t" .. db:getStatementResult("result", p, "object." .. p, q, stmtName) .. "\n")
    end
-   --file:write("\t\tstd::cout << object.toJson() << std::endl;\n");
+   -- file:write("\t\tstd::cout << object.toJson() << \" \" << out.size() << \" \" << out.empty() << std::endl;\n");
    file:write("\t\t\tout.push_back(object);\n\t\t}\n")
-   
+   file:write("\t\t" .. db:generateStmtReset(stmtName) .. "\n")
    file:write("\t}\n")
 end
 
@@ -128,21 +132,22 @@ function Common:generateSearchFunction(db, file, name, tbl)
    --file:write("\t\tstd::cout << result->set_row_index(0) << \" \" << result->error() << std::endl;\n");
 
    file:write("\t\t" .. db:generateRowLoop("result", stmtName) .. "\n\t\t{\n")
-   file:write("\t\t\t" .. db:getStatementResult("result", "id", "object.id", "uint64") .. "\n")
+   file:write("\t\t\t" .. db:getStatementResult("result", "id", "object.id", "uint64", stmtName) .. "\n")
    
    for p,q in orderedPairs(tbl) do
-      file:write("\t\t\t" .. db:getStatementResult("result", p, "object." .. p, q) .. "\n")
+      file:write("\t\t\t" .. db:getStatementResult("result", p, "object." .. p, q, stmtName) .. "\n")
    end
    --file:write("\t\tstd::cout << object.toJson() << std::endl;\n");
    file:write("\t\t\tout.push_back(object);\n\t\t}\n")
+   file:write("\t\t" .. db:generateStmtReset(stmtName) .. "\n")
    file:write("\t}\n")
 end
 
 function Common:generateCreateStmt(db, file, name, tbl)
-   print("Generating create" .. name .. "Stmt")  
-   
-   name = "create" .. name .. "Stmt"
-   file:write("\t\t" .. db:beginStatement(name) .. "\n")
+   print("Generating create" .. name .. "Stmt")
+
+   local stmtName =  "create" .. name .. "Stmt"
+   file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\"insert into `" .. name .. "` (")
 
    local size = 0
@@ -162,14 +167,14 @@ function Common:generateCreateStmt(db, file, name, tbl)
       file:write(") values();\"")
    end
    
-   file:write("\t\t" .. db:endStatement(name) .. "\n")
+   file:write("\t\t" .. db:endStatement(stmtName) .. "\n")
 end
 
 function Common:generateUpdateStmt(db, file, name, tbl)
    print("Generating update" .. name .. "Stmt")  
   -- file:write("\t\tupdate" .. name .. "Stmt = m_connection->create_statement(")
-   name = "update" .. name .. "Stmt"
-   file:write("\t\t" .. db:beginStatement(name) .. "\n")
+   local stmtName =  "update" .. name .. "Stmt"
+   file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\n\t\t\"update `" .. name .. "` set\"\n")
 
    local size = 0
@@ -180,29 +185,29 @@ function Common:generateUpdateStmt(db, file, name, tbl)
    -- Delete the last ',' as it is not needed
    file:seek("cur", -3)
    file:write(" where `id` = ?;\"")
-   file:write(db:endStatement(name) .. "\n")
+   file:write(db:endStatement(stmtName) .. "\n")
 end
 
 function Common:generateDeleteStmt(db, file, name, tbl)
-   print("Generating delete" .. name .. "Stmt")  
-   name = "delete" .. name .. "Stmt"
-   file:write("\t\t" .. db:beginStatement(name) .. "\n")
+   print("Generating delete" .. name .. "Stmt")
+   local stmtName =  "delete" .. name .. "Stmt"
+   file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\"delete from `" .. name .. "` where `id` = ?;\"")
-   file:write("\t\t" .. db:endStatement(name) .. "\n")
+   file:write("\t\t" .. db:endStatement(stmtName) .. "\n")
 end
 
 function Common:generateGetStmt(db, file, name, tbl)
    print("Generating get" .. name .. "Stmt")
-   name = "get" .. name .. "Stmt"
-   file:write("\t\t" .. db:beginStatement(name) .. "\n")
+   local stmtName = "get" .. name .. "Stmt"
+   file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\"select * from `" .. name .. "` where `id` = ?;\"")
-   file:write("\t\t" .. db:endStatement(name) .. "\n")
+   file:write("\t\t" .. db:endStatement(stmtName) .. "\n")
 end
 
 function Common:generateQueryStmt(db, file, name, tbl)
-   print("Generating query" .. name .. "Stmt")  
-   name = "query" .. name .. "Stmt"
-   file:write("\t\t" .. db:beginStatement(name) .. "\n")
+   print("Generating query" .. name .. "Stmt")
+   local stmtName = "query" .. name .. "Stmt"
+   file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\"select * from `" .. name .. "` where ")
 
    for p,q in orderedPairs(tbl) do
@@ -210,13 +215,13 @@ function Common:generateQueryStmt(db, file, name, tbl)
    end
 
    file:seek("cur", -5)
-   file:write("\t\t" .. db:endStatement(name) .. "\n")
+   file:write(";\"\t\t" .. db:endStatement(stmtName) .. "\n")
 end
 
 function Common:generateSearchStmt(db, file, name, tbl)
    print("Generating search" .. name .. "Stmt")
-   name = "search" .. name .. "Stmt"
-   file:write("\t\t" .. db:beginStatement(name) .. "\n")   
+   local stmtName = "search" .. name .. "Stmt"
+   file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\"select * from `" .. name .. "` where ")
 
    for p,q in orderedPairs(tbl) do
@@ -225,7 +230,7 @@ function Common:generateSearchStmt(db, file, name, tbl)
 
    file:seek("cur", -4)
    file:write(";\"")
-   file:write("\t\t" .. db:endStatement(name) .. "\n")
+   file:write("\t\t" .. db:endStatement(stmtName) .. "\n")
 end
 
 return Common
