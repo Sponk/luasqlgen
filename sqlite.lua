@@ -55,7 +55,8 @@ function SQLite:setStatementArg(name, idx, varname, typedef)
 end
 
 function SQLite:generateInsert(name, targetid)
-   return "{int err = sqlite3_step(" .. name.. "); " ..
+   return "{ int err = 0;\n"
+      .. "while((err = sqlite3_step(" .. name.. ")) == SQLITE_BUSY);\n\n" ..
 [[
     if(err != SQLITE_OK && err != SQLITE_DONE)
       throw std::runtime_error(std::string("Could not insert: ") + sqlite3_errmsg(m_database));
@@ -94,7 +95,8 @@ function SQLite:generateQuery(name, varname)
 end
 
 function SQLite:generateQueryFetchFirst(name, varname)
-   return "int " .. varname .. " = sqlite3_step(" .. name.. ");\n\n" ..
+   return "int " .. varname .. ";\n"
+      .. "while((" .. varname .. " = sqlite3_step(" .. name.. ")) == SQLITE_BUSY);\n\n" ..
    [[
 		if(]]..varname..[[ != SQLITE_ROW)
 			return false;
@@ -147,69 +149,20 @@ insert into `DBInfo` (version) values (']] .. tostring(description.version) .. [
 #include <exception>
 #include <vector>
 #include <fstream>
-]] .. description.defines .. [[
-
-namespace ]] .. description.name ..
-   [[
-{
-using std::string;
-typedef uint32_t uint;
-typedef int64_t int64;
-typedef uint64_t uint64;
-
-]])
+#include "]] .. description.name .. [[.h"
+namespace ]] .. description.name .. "\n{\n")
 
    for k,v in orderedPairs(tables) do
 
       -- SQL
       sqlfile:write("create table `" .. k .. "` (\n\t`id` integer primary key autoincrement")
       
-      -- C++
-      file:write("struct " .. k .. "\n{\n")
-      file:write("\tunsigned long long id = 0;\n")
-
-      local toJsonString = ""
       for p,q in orderedPairs(v) do
 	 -- SQL
 	 sqlfile:write(",\n\t`" .. p .. "` " .. type2sqlitesql(q) .. " NOT NULL")
-	 toJsonString = toJsonString .. "\t\t" .. [[ss << "\"]] .. p .. [[\" : \"" << ]] .. p .. " << \"\\\",\" << std::endl;\n";
-
-	 -- C++
-	 -- Write into struct
-	 if tables[q] ~= nil then
-	    if p ~= q then
-	       file:write("\tunsigned int " .. p .. " = 0;\n")
-	    end
-	 else
-	    if q ~= "string" then
-	       file:write("\t" .. q .. " " .. p .. " = 0;\n")
-	    else
-	       file:write("\t" .. q .. " " .. p .. ";\n")
-	    end
-	 end
       end
 
       sqlfile:write(");\n\n")
-
-      -- Generate toJson
-      file:write([[
-
-	std::string toJson() const
-	{
-		std::stringstream ss;
-		ss << "{\n";
-]] .. toJsonString .. [[
-		ss << "\"id\" : \"" << id << "\"\n";
-		ss << "}\n";
-		return ss.str();
-	}
-]])
-      -- Generate custom methods
-      for i,f in ipairs(description.structdef) do
-	 file:write(f(k, v))
-      end
-
-      file:write("};\n\n")
    end
 
 

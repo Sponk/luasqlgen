@@ -21,8 +21,8 @@ local mariadbpptypes = {
    string = "string",
    int = "signed32",
    uint = "unsigned32",
-   int64 = "signed64",
-   uint64 = "unsigned64",
+   int64 = "signed32", -- FIXME: 64bit variables are 32bit as of now! Prevents some corruption. Possibly a bug in MariaDBPP
+   uint64 = "unsigned32",
    bool = "unsigned32" -- FIXME: Byte?
 }
 
@@ -134,10 +134,6 @@ insert into `DBInfo` (version) values (']] .. tostring(description.version) .. [
 namespace ]] .. description.name ..
    [[
 {
-using std::string;
-typedef uint32_t uint;
-typedef int64_t int64;
-typedef uint64_t uint64;
 
 ]])
 
@@ -145,53 +141,13 @@ typedef uint64_t uint64;
 
       -- SQL
       sqlfile:write("create table `" .. k .. "` (\n\t`id` int primary key auto_increment")
-      
-      -- C++
-      file:write("struct " .. k .. "\n{\n")
-      file:write("\tunsigned long long id = 0;\n")
-
-      local toJsonString = ""
+    
       for p,q in orderedPairs(v) do
 	 -- SQL
 	 sqlfile:write(",\n\t`" .. p .. "` " .. type2mysql(q) .. " NOT NULL")
-	 toJsonString = toJsonString .. "\t\t" .. [[ss << "\"]] .. p .. [[\" : \"" << ]] .. p .. " << \"\\\",\" << std::endl;\n";
-
-	 -- C++
-	 -- Write into struct
-	 if tables[q] ~= nil then
-	    if p ~= q then
-	       file:write("\tunsigned int " .. p .. " = 0;\n")
-	    end
-	 else
-	    if q ~= "string" then
-	       file:write("\t" .. q .. " " .. p .. " = 0;\n")
-	    else
-	       file:write("\t" .. q .. " " .. p .. ";\n")
-	    end
-	 end
       end
 
       sqlfile:write(");\n\n")
-
-      -- Generate toJson
-      file:write([[
-
-	std::string toJson() const
-	{
-		std::stringstream ss;
-		ss << "{\n";
-]] .. toJsonString .. [[
-		ss << "\"id\" : \"" << id << "\"\n";
-		ss << "}\n";
-		return ss.str();
-	}
-]])
-      -- Generate custom methods
-      for i,f in ipairs(description.structdef) do
-	 file:write(f(k, v))
-      end
-
-      file:write("};\n\n")
    end
 
 
