@@ -208,7 +208,11 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 		//			      sqlite3_errmsg(m_database));
 		     
 		  //   sqlite3_initialize();
-		     m_databaseName = db + ".db";
+		     if(db != ":memory:")
+			m_databaseName = db + ".db";
+		     else
+			     m_databaseName = ":memory:";
+			     
 		     if (sqlite3_open(m_databaseName.c_str(), &m_database))
 		     throw std::runtime_error(std::string("Could not open database: ") +
 					      sqlite3_errmsg(m_database));
