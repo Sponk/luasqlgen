@@ -117,7 +117,7 @@ function Common:generateSearchFunction(db, file, name, tbl)
    file:write("\tvoid search" .. name .. "(std::vector<" .. name .. ">& out, const std::string& term)\n\t{\n")
 
    file:write([[
-		std::string processedTerm = term;
+		std::string processedTerm = "%" + term + "%";
 		std::replace(processedTerm.begin(), processedTerm.end(), ' ', '%');
 ]])
 
@@ -129,7 +129,6 @@ function Common:generateSearchFunction(db, file, name, tbl)
 
    file:write("\t\t" .. db:generateQuery(stmtName, "result") .. "\n\n")
    file:write("\t\tstruct " .. name .. " object;\n")
-   --file:write("\t\tstd::cout << result->set_row_index(0) << \" \" << result->error() << std::endl;\n");
 
    file:write("\t\t" .. db:generateRowLoop("result", stmtName) .. "\n\t\t{\n")
    file:write("\t\t\t" .. db:getStatementResult("result", "id", "object.id", "uint64", stmtName) .. "\n")

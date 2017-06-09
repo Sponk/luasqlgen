@@ -36,8 +36,8 @@ end
 
 local mysqltypes = {
    string = "text",
-   int = "int",
-   uint = "int unsigned",
+   int = "bigint",
+   uint = "bigint unsigned",
    int64 = "bigint",
    uint64 = "bigint unsigned",
    bool = "bool" -- FIXME: Byte?

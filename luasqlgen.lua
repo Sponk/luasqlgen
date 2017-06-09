@@ -1,7 +1,7 @@
 if #arg == 0 then
    os.exit(0)
 end
-
+--os.exit(0)
 function scriptPath()
    local str = debug.getinfo(2, "S").source:sub(2)
    return str:match("(.*/)")

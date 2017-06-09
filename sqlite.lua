@@ -59,13 +59,17 @@ function SQLite:generateInsert(name, targetid)
       .. "while((err = sqlite3_step(" .. name.. ")) == SQLITE_BUSY);\n\n" ..
 [[
     if(err != SQLITE_OK && err != SQLITE_DONE)
+    {
+      sqlite3_reset(]].. name .. [[);
       throw std::runtime_error(std::string("Could not insert: ") + sqlite3_errmsg(m_database));
- ]] .. targetid .. [[ = sqlite3_last_insert_rowid(m_database); }
+    }
+ ]] .. targetid .. [[ = sqlite3_last_insert_rowid(m_database);
+}
 ]]
 end
 
 function SQLite:generateExecute(name)
-   return "sqlite3_step(" .. name.. ");"
+   return "while(sqlite3_step(" .. name.. ") == SQLITE_BUSY);"
 end	  
 
 function SQLite:getStatementResult(resultname, name, varname, typedef, stmt)
@@ -99,7 +103,10 @@ function SQLite:generateQueryFetchFirst(name, varname)
       .. "while((" .. varname .. " = sqlite3_step(" .. name.. ")) == SQLITE_BUSY);\n\n" ..
    [[
 		if(]]..varname..[[ != SQLITE_ROW)
+		{
+		    sqlite3_reset(]] .. name .. [[);
 			return false;
+		}
 ]]
 end
 
@@ -115,9 +122,9 @@ end
 
 function SQLite:endStatement(name)
    return ", -1, &" .. name .. ", 0); " 
-      .. "if(err != SQLITE_OK) throw "
+      .. "if(err != SQLITE_OK) { sqlite3_reset(" .. name .. "); throw "
       .. "std::runtime_error(std::string(\"Could not prepare statement:\") +" ..
-					      "sqlite3_errmsg(m_database));}"
+					      "sqlite3_errmsg(m_database));} }"
 
 end
 
