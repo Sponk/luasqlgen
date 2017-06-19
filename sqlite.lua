@@ -56,7 +56,7 @@ end
 
 function SQLite:generateInsert(name, targetid)
    return "{ int err = 0;\n"
-      .. "while((err = sqlite3_step(" .. name.. ")) == SQLITE_BUSY);\n\n" ..
+      .. "while((err = sqlite3_step(" .. name.. ")) == SQLITE_BUSY) \n{\n}\n\n" ..
 [[
     if(err != SQLITE_OK && err != SQLITE_DONE)
     {
@@ -69,7 +69,7 @@ function SQLite:generateInsert(name, targetid)
 end
 
 function SQLite:generateExecute(name)
-   return "while(sqlite3_step(" .. name.. ") == SQLITE_BUSY);"
+   return "while(sqlite3_step(" .. name.. ") == SQLITE_BUSY) \n{\n}"
 end	  
 
 function SQLite:getStatementResult(resultname, name, varname, typedef, stmt)
@@ -100,7 +100,7 @@ end
 
 function SQLite:generateQueryFetchFirst(name, varname)
    return "int " .. varname .. ";\n"
-      .. "while((" .. varname .. " = sqlite3_step(" .. name.. ")) == SQLITE_BUSY);\n\n" ..
+      .. "while((" .. varname .. " = sqlite3_step(" .. name.. ")) == SQLITE_BUSY) \n{\n}\n\n" ..
    [[
 		if(]]..varname..[[ != SQLITE_ROW)
 		{
@@ -206,8 +206,8 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
   
    file:write([[
 
-		  void connect(const std::string& db, const std::string& host,
-			       const std::string& name, const std::string& password, const unsigned short port)
+		  void connect(const std::string& db, const std::string&,
+			       const std::string&, const std::string&, const unsigned short)
 		  {
 		     //sqlite3_shutdown();
 		     //if(sqlite3_config(SQLITE_CONFIG_SERIALIZED) != SQLITE_OK)
@@ -269,6 +269,18 @@ void drop()
 
 void close()
 {
+]])
+
+for k,v in orderedPairs(tables) do
+	file:write("\tsqlite3_finalize(create" .. k .. "Stmt);\n")
+	file:write("\tsqlite3_finalize(update" .. k .. "Stmt);\n")
+	file:write("\tsqlite3_finalize(delete" .. k .. "Stmt);\n")
+	file:write("\tsqlite3_finalize(query" .. k .. "Stmt);\n")
+	file:write("\tsqlite3_finalize(get" .. k .. "Stmt);\n")
+	file:write("\tsqlite3_finalize(search" .. k .. "Stmt);\n")
+end
+
+file:write([[
    sqlite3_close(m_database); 
    m_database = nullptr;
 }
@@ -289,8 +301,8 @@ bool tableExists(const std::string& name)
 	query << "SELECT name FROM sqlite_master WHERE type='table' AND name='"
 		  << name << "'";
 
-	const auto callback = [](void* data, int argc, char** argv,
-							 char** colName) {
+	const auto callback = [](void* data, int argc, char**,
+							 char**) {
 		bool* result = reinterpret_cast<bool*>(data);
 		*result = (argc > 0);
 		return 0;
