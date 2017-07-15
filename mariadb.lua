@@ -107,7 +107,7 @@ function MariaDB:generateStmtReset(name)
 end
 
 function MariaDB:processStructs(description)
-   print("Generating structs...")
+   -- print("Generating structs...")
    local file = io.open(description.name .. "MariaDB.h", "w")
    local sqlfile = io.open(description.name .. "MariaDB.sql", "w")
    local tables = description.tables

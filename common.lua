@@ -2,7 +2,7 @@
 local Common = {}
 
 function Common:generateCreateFunction(db, file, name, tbl)
-   print("Generating create" .. name)
+   -- print("Generating create" .. name)
    local stmtName = "create" .. name .. "Stmt"
    
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
@@ -21,7 +21,7 @@ function Common:generateCreateFunction(db, file, name, tbl)
 end
 
 function Common:generateUpdateFunction(db, file, name, tbl)
-   print("Generating update" .. name)
+   -- print("Generating update" .. name)
    local stmtName = "update" .. name .. "Stmt"
 
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
@@ -41,7 +41,7 @@ function Common:generateUpdateFunction(db, file, name, tbl)
 end
 
 function Common:generateDeleteFunction(db, file, name, tbl)
-   print("Generating delete" .. name)
+   -- print("Generating delete" .. name)
    local stmtName = "delete" .. name .. "Stmt"
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
    file:write("\tvoid delete" .. name .. "(unsigned long long id)\n\t{\n")
@@ -54,7 +54,7 @@ function Common:generateDeleteFunction(db, file, name, tbl)
 end
 
 function Common:generateGetFunction(db, file, name, tbl)
-   print("Generating get" .. name)
+   -- print("Generating get" .. name)
    local stmtName = "get" .. name .. "Stmt"
 
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
@@ -74,7 +74,7 @@ function Common:generateGetFunction(db, file, name, tbl)
 end
 
 function Common:generateQueryFunction(db, file, name, tbl)
-   print("Generating query" .. name)
+   -- print("Generating query" .. name)
    local stmtName = "query" .. name .. "Stmt"
 
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
@@ -110,7 +110,7 @@ function Common:generateQueryFunction(db, file, name, tbl)
 end
 
 function Common:generateSearchFunction(db, file, name, tbl)
-   print("Generating search" .. name)
+   -- print("Generating search" .. name)
    local stmtName = "search" .. name .. "Stmt"
 
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
@@ -143,7 +143,7 @@ function Common:generateSearchFunction(db, file, name, tbl)
 end
 
 function Common:generateCreateStmt(db, file, name, tbl)
-   print("Generating create" .. name .. "Stmt")
+   -- print("Generating create" .. name .. "Stmt")
 
    local stmtName =  "create" .. name .. "Stmt"
    file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
@@ -170,7 +170,7 @@ function Common:generateCreateStmt(db, file, name, tbl)
 end
 
 function Common:generateUpdateStmt(db, file, name, tbl)
-   print("Generating update" .. name .. "Stmt")  
+   -- print("Generating update" .. name .. "Stmt")  
   -- file:write("\t\tupdate" .. name .. "Stmt = m_connection->create_statement(")
    local stmtName =  "update" .. name .. "Stmt"
    file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
@@ -188,7 +188,7 @@ function Common:generateUpdateStmt(db, file, name, tbl)
 end
 
 function Common:generateDeleteStmt(db, file, name, tbl)
-   print("Generating delete" .. name .. "Stmt")
+   -- print("Generating delete" .. name .. "Stmt")
    local stmtName =  "delete" .. name .. "Stmt"
    file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\"delete from `" .. name .. "` where `id` = ?;\"")
@@ -196,7 +196,7 @@ function Common:generateDeleteStmt(db, file, name, tbl)
 end
 
 function Common:generateGetStmt(db, file, name, tbl)
-   print("Generating get" .. name .. "Stmt")
+   -- print("Generating get" .. name .. "Stmt")
    local stmtName = "get" .. name .. "Stmt"
    file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\"select * from `" .. name .. "` where `id` = ?;\"")
@@ -204,7 +204,7 @@ function Common:generateGetStmt(db, file, name, tbl)
 end
 
 function Common:generateQueryStmt(db, file, name, tbl)
-   print("Generating query" .. name .. "Stmt")
+   -- print("Generating query" .. name .. "Stmt")
    local stmtName = "query" .. name .. "Stmt"
    file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\"select * from `" .. name .. "` where ")
@@ -218,7 +218,7 @@ function Common:generateQueryStmt(db, file, name, tbl)
 end
 
 function Common:generateSearchStmt(db, file, name, tbl)
-   print("Generating search" .. name .. "Stmt")
+   -- print("Generating search" .. name .. "Stmt")
    local stmtName = "search" .. name .. "Stmt"
    file:write("\t\t" .. db:beginStatement(stmtName) .. "\n")
    file:write("\"select * from `" .. name .. "` where ")

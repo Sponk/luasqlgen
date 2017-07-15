@@ -7,8 +7,6 @@ function scriptPath()
    return str:match("(.*/)")
 end
 
-print(scriptPath())
-
 --
 -- Stuff to ensure alphabetic order
 -- Taken from http://lua-users.org/wiki/SortedIteration
@@ -81,6 +79,7 @@ structfile:write([[
 
 #include <string>
 #include <cstdint>
+#include <regex>
 ]] .. description.defines .. [[namespace ]] .. description.name ..
    [[
 {
@@ -117,6 +116,17 @@ for k,v in orderedPairs(tables) do
       end
    end
 
+   structfile:write("\n\tvoid validate()\n\t{\n")
+   structfile:write("\t\t// Integrity check\n")
+   if description.checks ~= nil and description.checks[k] ~= nil then
+   		for field, regex in orderedPairs(description.checks[k]) do
+			structfile:write("\t\tif(!std::regex_match(" .. field .. ", std::regex(\"" .. regex 
+				.. "\")))\n\t\t\tthrow std::runtime_error(\"Integrity check failed: " 
+				.. field .. "\");\n")
+		end
+   end
+   structfile:write("\t}\n")
+   
    -- Generate toJson
    structfile:write([[
 

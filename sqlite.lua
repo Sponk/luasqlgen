@@ -133,7 +133,7 @@ function SQLite:generateStmtReset(name)
 end
 
 function SQLite:processStructs(description)
-   print("Generating structs...")
+   -- print("Generating structs...")
    local file = io.open(description.name .. "SQLite.h", "w")
    local sqlfile = io.open(description.name .. "SQLite.sql", "w")
    local tables = description.tables
