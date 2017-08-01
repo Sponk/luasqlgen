@@ -6,7 +6,8 @@ local mariadbpptypes = {
    uint = "unsigned32",
    int64 = "signed64",
    uint64 = "unsigned64",
-   bool = "unsigned32" -- FIXME: Byte?
+   bool = "unsigned32", -- FIXME: Byte?
+   double = "double"
 }
 
 local function type2mariadbpp(type)
@@ -23,7 +24,8 @@ local mariadbpptypes = {
    uint = "unsigned32",
    int64 = "signed32", -- FIXME: 64bit variables are 32bit as of now! Prevents some corruption. Possibly a bug in MariaDBPP
    uint64 = "unsigned32",
-   bool = "unsigned32" -- FIXME: Byte?
+   bool = "unsigned32", -- FIXME: Byte?
+   double = "double"
 }
 
 local function type2mariadbpp(type)
@@ -40,7 +42,8 @@ local mysqltypes = {
    uint = "bigint unsigned",
    int64 = "bigint",
    uint64 = "bigint unsigned",
-   bool = "bool" -- FIXME: Byte?
+   bool = "bool", -- FIXME: Byte?
+   double = "double"
 }
 
 function type2mysql(type)

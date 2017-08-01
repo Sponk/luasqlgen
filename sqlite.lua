@@ -6,7 +6,8 @@ local sqlitetypes = {
    uint = "int",
    int64 = "int",
    uint64 = "int",
-   bool = "int" -- FIXME: Byte?
+   bool = "int", -- FIXME: Byte?
+   double = "double"
 }
 
 local function type2sqlite(type)
@@ -23,7 +24,8 @@ local sqlitesqltypes = {
    uint = "int unsigned",
    int64 = "bigint",
    uint64 = "bigint unsigned",
-   bool = "bool" -- FIXME: Byte?
+   bool = "bool", -- FIXME: Byte?
+   double = "double"
 }
 
 function type2sqlitesql(type)
