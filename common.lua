@@ -6,7 +6,7 @@ function Common:generateCreateFunction(db, file, name, tbl)
    local stmtName = "create" .. name .. "Stmt"
    
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
-   file:write("\tvoid create" .. name .. "(struct " .. name .. "& self)\n\t{\n")
+   file:write("\tvoid create" .. name .. "(struct " .. name .. "& self) override\n\t{\n")
    
    local i = 0;
    for p,q in orderedPairs(tbl) do
@@ -25,7 +25,7 @@ function Common:generateUpdateFunction(db, file, name, tbl)
    local stmtName = "update" .. name .. "Stmt"
 
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
-   file:write("\tvoid update" .. name .. "(const struct " .. name .. "& self)\n\t{\n")
+   file:write("\tvoid update" .. name .. "(const struct " .. name .. "& self) override\n\t{\n")
 
    local i = 0;
    for p,q in orderedPairs(tbl) do
@@ -44,7 +44,7 @@ function Common:generateDeleteFunction(db, file, name, tbl)
    -- print("Generating delete" .. name)
    local stmtName = "delete" .. name .. "Stmt"
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
-   file:write("\tvoid delete" .. name .. "(unsigned long long id)\n\t{\n")
+   file:write("\tvoid delete" .. name .. "(unsigned long long id) override\n\t{\n")
 
    file:write("\t\t" .. db:setStatementArg(stmtName, 0, "id", "uint64") .. "\n")
 
@@ -58,7 +58,7 @@ function Common:generateGetFunction(db, file, name, tbl)
    local stmtName = "get" .. name .. "Stmt"
 
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
-   file:write("\tbool get" .. name .. "(unsigned long long id, " .. name .. "& object)\n\t{\n")
+   file:write("\tbool get" .. name .. "(unsigned long long id, " .. name .. "& object) override\n\t{\n")
 
 
    file:write("\t\t" .. db:setStatementArg(stmtName, 0, "id", "uint64") .. "\n")
@@ -84,7 +84,7 @@ function Common:generateQueryFunction(db, file, name, tbl)
       file:write("const std::string& " .. p .. ", ")
    end
    file:seek("cur", -2)
-   file:write(")\n\t{\n")
+   file:write(") override\n\t{\n")
    
    local i = 0;
    for p,q in orderedPairs(tbl) do

@@ -155,7 +155,8 @@ namespace ]] .. description.name ..
 
 
    file:write(
-      "\n\nclass " .. description.name .. "MariaDB\n{\npublic:\n\t" .. description.name  ..
+      "\n\nclass " .. description.name .. "MariaDB : public " .. description.name .. "Abstract"
+              .. "\n{\npublic:\n\t" .. description.name  ..
 	 [[
 MariaDB(const std::string& db, const std::string& host, const std::string& name,
 				const std::string& password, const unsigned short port)

@@ -140,14 +140,35 @@ for k,v in orderedPairs(tables) do
 			  return ss.str();
 			  }
 ]])
--- Generate custom methods
-for i,f in ipairs(description.structdef) do
-   structfile:write(f(k, v))
+	-- Generate custom methods
+	for i,f in ipairs(description.structdef) do
+	   structfile:write(f(k, v))
+	end
+
+	structfile:write("};\n\n")
+end
+structfile:write("class " .. description.name .. "Abstract\n{\n")
+structfile:write("public:\n")
+
+for name,v in orderedPairs(tables) do
+	structfile:write("\tvirtual void create" .. name .. "(struct " .. name .. "&) = 0;\n")
+	structfile:write("\tvirtual bool get" .. name .. "(unsigned long long, " .. name .. "&) = 0;\n")
+	structfile:write("\tvirtual void update" .. name .. "(const struct " .. name .. "&) = 0;\n")
+	structfile:write("\tvirtual void delete" .. name .. "(unsigned long long) = 0;\n")
+
+	structfile:write("\tvirtual void query" .. name .. "(std::vector<" .. name .. ">& out, ") -- "\n\t{\n")
+	for p,q in orderedPairs(v) do
+		structfile:write("const std::string& " .. p .. ", ")
+	end
+	structfile:seek("cur", -2)
+	structfile:write(") = 0;\n")
+
+	structfile:write("\tvirtual void search" .. name .. "(std::vector<" .. name .. ">& out, const std::string&) = 0;\n")
 end
 
-structfile:write("};\n\n")
-end
-structfile:write("}\n")
+structfile:write("};\n") -- Abstract class
+
+structfile:write("}\n") -- Namespace
 structfile:close()
 
 local testfile = io.open(description.name .. "Test.cpp", "w")

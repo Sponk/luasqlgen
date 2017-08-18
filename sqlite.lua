@@ -176,7 +176,8 @@ namespace ]] .. description.name .. "\n{\n")
 
 
    file:write(
-      "\n\nclass " .. description.name .. "SQLite\n{\npublic:\n\t" .. description.name  ..
+      "\n\nclass " .. description.name .. "SQLite : public " .. description.name .. "Abstract"
+              .. "\n{\npublic:\n\t" .. description.name  ..
 	 [[
 SQLite(const std::string& db, const std::string& host, const std::string& name,
 				const std::string& password, const unsigned short port)
