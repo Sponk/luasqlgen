@@ -249,6 +249,43 @@ void query(const std::string& q)
    m_connection->execute(q);
 }
 
+std::string queryJson(const std::string& query) override
+{
+	std::stringstream ss;
+	ss << "[\n";
+	
+	mariadb::result_set_ref result = m_connection->query(query);
+	for(unsigned int j = 0; j < result->row_count() && result->next(); j++)
+	{
+		for(unsigned int i = 0; i < result->column_count(); i++)
+			ss << "\"" << result->column_name(i) << "\" : \"" << result->get_string(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+	}
+	
+	ss << "]\n";
+	return ss.str();
+}
+
+std::string queryJson(const std::string& query, const std::vector<std::string>& args)
+{
+	mariadb::statement_ref stmt = m_connection->create_statement(query);
+	
+	for(size_t i = 0; i < args.size(); i++)
+		stmt->set_string(i, args[i]);
+	
+	std::stringstream ss;
+	ss << "[\n";
+	
+	mariadb::result_set_ref result = stmt->query();
+	for(unsigned int j = 0; j < result->row_count() && result->next(); j++)
+	{
+		for(unsigned int i = 0; i < result->column_count(); i++)
+			ss << "\"" << result->column_name(i) << "\" : \"" << result->get_string(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+	}
+	
+	ss << "]\n";
+	return ss.str();
+}
+
 mariadb::connection_ref getConnection() const { return m_connection; }
 
 private:

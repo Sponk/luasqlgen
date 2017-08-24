@@ -245,6 +245,87 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 		     query(buf.str());
 		  }
 
+		  std::string queryJson(const std::string& query) override
+		  {
+			std::stringstream ss;
+			ss << "[\n";
+			const auto callback = [](void* data, int argc, char** argv,
+									char** colName) {
+				std::stringstream* selection =
+					reinterpret_cast<std::stringstream*>(data);
+
+				(*selection) << "{\n";
+				for (int i = 0; i < argc; i++)
+					(*selection) << "\"" << colName[i] << "\" : \"" << (argv[i] ? argv[i] : "") << (i == argc - 1 ? "\"\n" : "\",\n");
+				
+				(*selection) << "},\n";
+				return 0;
+			};
+
+			char* error = nullptr;
+			if (sqlite3_exec(m_database, query.c_str(), callback, &ss, &error) != SQLITE_OK)
+				throw std::runtime_error(std::string("Could not access database: ") +
+										error);
+			
+			std::string result = ss.str();
+			result.erase(result.end() - 2);
+			return result + "]\n";
+
+		  }
+		  
+		  std::string queryJson(const std::string& query, const std::vector<std::string>& args) override
+		  {
+			sqlite3_stmt* stmt;
+			if(sqlite3_prepare_v2(m_database, query.c_str(), -1, &stmt, 0) != SQLITE_OK) 
+			{ 
+				sqlite3_finalize(stmt);
+				throw std::runtime_error(std::string("Could not prepare statement:") + sqlite3_errmsg(m_database)); 
+			}
+			
+			for(size_t i = 0; i < args.size(); i++)
+			{
+				std::cout << "BINDING: " << args[i] << std::endl;
+				sqlite3_bind_text(stmt, i + 1, args[i].c_str(), args[i].size(), nullptr);
+			}
+			
+			std::stringstream ss;
+			ss << "[\n";
+
+			size_t colnum = sqlite3_column_count(stmt);
+			int rc = 0;
+			while(true) // TODO  Maybe row limit?
+			{
+				rc = sqlite3_step(stmt);
+				if(rc == SQLITE_ROW)
+				{
+					ss << "{\n";
+					for (size_t i = 0; i < colnum; i++)
+					{
+						const char* coltext = (const char*) sqlite3_column_text(stmt, i);
+						ss << "\"" << sqlite3_column_name(stmt, i) << "\" : \"" << (coltext ? coltext : "") << (i == colnum - 1 ? "\"\n" : "\",\n");
+					}
+					
+					ss << "},\n";
+				}
+				else
+				{
+					break;
+				}
+			}
+			
+			if(rc != SQLITE_DONE)
+			{
+				sqlite3_finalize(stmt);
+				throw std::runtime_error(std::string("Could not prepare statement:") + sqlite3_errmsg(m_database)); 
+			}
+			
+			sqlite3_finalize(stmt);
+
+			std::string result = ss.str();
+			result.erase(result.end() - 2);
+			return result + "]\n";
+		  }
+		  
 		  void init(const std::string& db)
 		  {
 		     // Check if tables exist or not

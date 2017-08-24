@@ -166,6 +166,9 @@ for name,v in orderedPairs(tables) do
 	structfile:write("\tvirtual void search" .. name .. "(std::vector<" .. name .. ">& out, const std::string&) = 0;\n")
 end
 
+structfile:write("virtual std::string queryJson(const std::string& query) = 0;\n")
+structfile:write("virtual std::string queryJson(const std::string& query, const std::vector<std::string>& args) = 0;\n")	                                                                                                  
+
 structfile:write("};\n") -- Abstract class
 
 structfile:write("}\n") -- Namespace
