@@ -205,6 +205,11 @@ for name,v in orderedPairs(tables) do
 	structfile:write("\tvirtual void update" .. name .. "(const struct " .. name .. "&) = 0;\n")
 	structfile:write("\tvirtual void delete" .. name .. "(unsigned long long) = 0;\n")
 
+	structfile:write("\tvirtual bool get(unsigned long long id, struct " .. name .. "& self) { return get" .. name .. "(id, self); }\n")
+	structfile:write("\tvirtual void update(const struct " .. name .. "& self) { update" .. name .. "(self); }\n")
+	structfile:write("\tvirtual void create(struct " .. name .. "& self) { create" .. name .. "(self); }\n")
+	structfile:write("\tvoid remove(const " .. name .. "& self)  { delete" .. name .. "(self.id); }\n")
+
 	structfile:write("\tvirtual void query" .. name .. "(std::vector<" .. name .. ">& out, ") -- "\n\t{\n")
 	for p,q in orderedPairs(v) do
 		structfile:write("const std::string& " .. p .. ", ")
@@ -242,7 +247,6 @@ structfile:write("virtual std::string queryJson(const std::string& query) = 0;\n
 structfile:write("virtual std::string queryJson(const std::string& query, const std::vector<std::string>& args) = 0;\n")
 
 structfile:write("};\n") -- Abstract class
-
 structfile:write("}\n") -- Namespace
 structfile:close()
 

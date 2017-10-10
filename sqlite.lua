@@ -284,13 +284,10 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 			
 			for(size_t i = 0; i < args.size(); i++)
 			{
-				std::cout << "BINDING: " << args[i] << std::endl;
 				sqlite3_bind_text(stmt, i + 1, args[i].c_str(), args[i].size(), nullptr);
 			}
 			
 			std::stringstream ss;
-			ss << "[\n";
-
 			size_t colnum = sqlite3_column_count(stmt);
 			int rc = 0;
 			while(true) // TODO  Maybe row limit?
@@ -322,8 +319,11 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 			sqlite3_finalize(stmt);
 
 			std::string result = ss.str();
-			result.erase(result.end() - 2);
-			return result + "]\n";
+
+			if(!result.empty())
+				result.erase(result.end() - 2);
+			
+			return "[\n" + result + "]\n";
 		  }
 		  
 		  void init(const std::string& db)
@@ -348,7 +348,7 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 void drop()
 {
    close();
-   remove(m_databaseName.c_str());
+   ::remove(m_databaseName.c_str());
 }
 
 void close()
