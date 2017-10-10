@@ -273,17 +273,67 @@ std::string queryJson(const std::string& query, const std::vector<std::string>& 
 		stmt->set_string(i, args[i]);
 	
 	std::stringstream ss;
-	ss << "[\n";
-	
+
 	mariadb::result_set_ref result = stmt->query();
 	for(unsigned int j = 0; j < result->row_count() && result->next(); j++)
 	{
+                ss << "{\n";
 		for(unsigned int i = 0; i < result->column_count(); i++)
-			ss << "\"" << result->column_name(i) << "\" : \"" << result->get_string(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                {
+                        switch(result->column_type(i))
+                        {
+                                case mariadb::value::string:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_string(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::unsigned8:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_unsigned8(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::unsigned16:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_unsigned16(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::unsigned32:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_unsigned32(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::unsigned64:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_unsigned64(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::signed8:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_signed8(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::signed16:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_signed16(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::signed32:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_signed32(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::signed64:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_signed64(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::float32:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_float(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+                                case mariadb::value::double64:
+			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_double(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                break;
+
+                               case mariadb::value::blob:
+                                        ss << "\"" << result->column_name(i) << "\" : \"" << result->get_string(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                               break;
+
+                                default: throw std::runtime_error(std::string("Received unknown type from MariaDB! (") 
+                                        + result->column_name(i) + " is "
+                                        + std::to_string(result->column_type(i)) + ")");
+                        }
+                }
+
+                ss << "},\n";
 	}
 	
-	ss << "]\n";
-	return ss.str();
+        std::string resultStr = ss.str();
+	if(!resultStr.empty())
+		resultStr.erase(resultStr.end() - 2);
+
+	return "[\n" + resultStr + "]\n";
 }
 
 mariadb::connection_ref getConnection() const { return m_connection; }
