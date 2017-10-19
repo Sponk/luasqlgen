@@ -61,6 +61,10 @@ function MariaDB:process(filename)
    self:processStructs(description)
 end
 
+function MariaDB:generateConnectionGuard()
+   return "if(!m_connection->connected()) { m_connection->connect(); }"
+end
+
 function MariaDB:generateStatement(name)
    return "mariadb::statement_ref " .. name .. ";"
 end
@@ -212,6 +216,9 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
 		     std::stringstream buf;
 		     buf << in.rdbuf();
 
+		     if(!m_connection->connected())
+			m_connection->connect();
+			
 		     m_connection->execute(buf.str());
 		  }
 
@@ -219,7 +226,7 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
 		  {
 		     // Check if tables exist or not
 			if(m_connection->query("show tables like 'DBInfo';")->row_count() == 0)
-		     execute(db);
+				execute(db);
 
 	       ]])
 
@@ -246,13 +253,22 @@ void close()
 
 void query(const std::string& q)
 {
-   m_connection->execute(q);
+	if(!m_connection->connected())
+	{
+		m_connection->connect();
+	}
+	m_connection->execute(q);
 }
 
 std::string queryJson(const std::string& query) override
 {
 	std::stringstream ss;
 	ss << "[\n";
+	
+	if(!m_connection->connected())
+	{
+		m_connection->connect();
+	}
 	
 	mariadb::result_set_ref result = m_connection->query(query);
 	for(unsigned int j = 0; j < result->row_count() && result->next(); j++)
@@ -267,6 +283,9 @@ std::string queryJson(const std::string& query) override
 
 std::string queryJson(const std::string& query, const std::vector<std::string>& args)
 {
+	if(!m_connection->connected())
+		m_connection->connect();
+	
 	mariadb::statement_ref stmt = m_connection->create_statement(query);
 	
 	for(size_t i = 0; i < args.size(); i++)

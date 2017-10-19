@@ -7,7 +7,8 @@ function Common:generateCreateFunction(db, file, name, tbl)
    
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
    file:write("\tvoid create" .. name .. "(struct " .. name .. "& self) override\n\t{\n")
-   
+   file:write("\t\t" .. db:generateConnectionGuard() .. "\n")
+
    local i = 0;
    for p,q in orderedPairs(tbl) do
       file:write("\t\t" .. db:setStatementArg(stmtName, i, "self." .. p, q) .. "\n")
@@ -26,7 +27,8 @@ function Common:generateUpdateFunction(db, file, name, tbl)
 
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
    file:write("\tvoid update" .. name .. "(const struct " .. name .. "& self) override\n\t{\n")
-
+   file:write("\t\t" .. db:generateConnectionGuard() .. "\n")
+   
    local i = 0;
    for p,q in orderedPairs(tbl) do
       file:write("\t\t" .. db:setStatementArg(stmtName, i, "self." .. p, q) .. "\n")
@@ -45,6 +47,7 @@ function Common:generateDeleteFunction(db, file, name, tbl)
    local stmtName = "delete" .. name .. "Stmt"
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
    file:write("\tvoid delete" .. name .. "(unsigned long long id) override\n\t{\n")
+   file:write("\t\t" .. db:generateConnectionGuard() .. "\n")
 
    file:write("\t\t" .. db:setStatementArg(stmtName, 0, "id", "uint64") .. "\n")
 
@@ -59,7 +62,7 @@ function Common:generateGetFunction(db, file, name, tbl)
 
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
    file:write("\tbool get" .. name .. "(unsigned long long id, " .. name .. "& object) override\n\t{\n")
-
+   file:write("\t\t" .. db:generateConnectionGuard() .. "\n")
 
    file:write("\t\t" .. db:setStatementArg(stmtName, 0, "id", "uint64") .. "\n")
    file:write("\t\t" .. db:generateQueryFetchFirst(stmtName, "result") .. "\n")
@@ -85,7 +88,9 @@ function Common:generateQueryFunction(db, file, name, tbl)
    end
    file:seek("cur", -2)
    file:write(") override\n\t{\n")
-   
+  
+   file:write("\t\t" .. db:generateConnectionGuard() .. "\n")
+
    local i = 0;
    for p,q in orderedPairs(tbl) do
       file:write("\t\t" .. db:setStatementArg(stmtName, i, p, "string") .. "\n")
@@ -115,7 +120,7 @@ function Common:generateSearchFunction(db, file, name, tbl)
 
    file:write("\n\t".. db:generateStatement(stmtName) .. "\n")
    file:write("\tvoid search" .. name .. "(std::vector<" .. name .. ">& out, const std::string& term)\n\t{\n")
-
+   file:write("\t\t" .. db:generateConnectionGuard() .. "\n")
    file:write([[
 		std::string processedTerm = "%" + term + "%";
 		std::replace(processedTerm.begin(), processedTerm.end(), ' ', '%');
