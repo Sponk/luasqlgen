@@ -43,6 +43,10 @@ function SQLite:process(filename)
    self:processStructs(description)
 end
 
+function SQLite:generateConnectionGuard()
+   return ""
+end
+
 function SQLite:generateStatement(name)
    return "sqlite3_stmt* " .. name .. ";"
 end
