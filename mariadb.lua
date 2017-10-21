@@ -62,7 +62,13 @@ function MariaDB:process(filename)
 end
 
 function MariaDB:generateConnectionGuard()
-   return "if(!m_connection->connected()) { m_connection->connect(); }"
+   return [[if(!m_connection->connected()) 
+		{ 
+			m_connection->connect(); 
+			m_connection->set_auto_commit(true); 
+			init(m_connection->schema());
+		}
+]]
 end
 
 function MariaDB:generateStatement(name)
@@ -201,10 +207,9 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
 
 		     m_connection = mariadb::connection::create(account);
 		     if(!m_connection->connect())
-		     throw std::runtime_error("Could not connect to MariaDB database: " + m_connection->error());
-
-		     m_connection->execute("CREATE DATABASE IF NOT EXISTS " + db + "; USE " + db + ";");
-		     m_connection->set_schema(db);
+			throw std::runtime_error("Could not connect to MariaDB database: " + m_connection->error());
+			
+			m_connection->set_schema(db);
 		  }
 
 		  void execute(const std::string& file)
@@ -224,7 +229,10 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
 
 		  void init(const std::string& db)
 		  {
-		     // Check if tables exist or not
+			// Select database
+			m_connection->execute("CREATE DATABASE IF NOT EXISTS " + m_connection->schema() + "; USE " + m_connection->schema() + ";");
+			
+			// Check if tables exist or not
 			if(m_connection->query("show tables like 'DBInfo';")->row_count() == 0)
 				execute(db);
 
