@@ -209,6 +209,7 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
 		     if(!m_connection->connect())
 			throw std::runtime_error("Could not connect to MariaDB database: " + m_connection->error());
 			
+			m_connection->execute("CREATE DATABASE IF NOT EXISTS " + m_connection->schema() + ";");
 			m_connection->set_schema(db);
 		  }
 
@@ -230,7 +231,7 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
 		  void init(const std::string& db)
 		  {
 			// Select database
-			m_connection->execute("CREATE DATABASE IF NOT EXISTS " + m_connection->schema() + "; USE " + m_connection->schema() + ";");
+			m_connection->execute("USE " + m_connection->schema() + ";");
 			
 			// Check if tables exist or not
 			if(m_connection->query("show tables like 'DBInfo';")->row_count() == 0)
