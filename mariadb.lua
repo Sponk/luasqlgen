@@ -262,10 +262,7 @@ void close()
 
 void query(const std::string& q)
 {
-	if(!m_connection->connected())
-	{
-		m_connection->connect();
-	}
+	]] .. MariaDB:generateConnectionGuard() .. [[
 	m_connection->execute(q);
 }
 
@@ -274,10 +271,7 @@ std::string queryJson(const std::string& query) override
 	std::stringstream ss;
 	ss << "[\n";
 	
-	if(!m_connection->connected())
-	{
-		m_connection->connect();
-	}
+	]] .. MariaDB:generateConnectionGuard() .. [[
 	
 	mariadb::result_set_ref result = m_connection->query(query);
 	for(unsigned int j = 0; j < result->row_count() && result->next(); j++)
@@ -292,8 +286,7 @@ std::string queryJson(const std::string& query) override
 
 std::string queryJson(const std::string& query, const std::vector<std::string>& args)
 {
-	if(!m_connection->connected())
-		m_connection->connect();
+	]] .. MariaDB:generateConnectionGuard() .. [[
 	
 	mariadb::statement_ref stmt = m_connection->create_statement(query);
 	
