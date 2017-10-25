@@ -199,37 +199,36 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
   
    file:write([[
 
-		  void connect(const std::string& db, const std::string& host,
+		void connect(const std::string& db, const std::string& host,
 			       const std::string& name, const std::string& password, const unsigned short port)
-		  {
-		     mariadb::account_ref account = mariadb::account::create(host, name, password, "", port);
-		     account->set_auto_commit(true);
+		{
+			mariadb::account_ref account = mariadb::account::create(host, name, password, "", port);
+			account->set_auto_commit(true);
 
-		     m_connection = mariadb::connection::create(account);
-		     if(!m_connection->connect())
-			throw std::runtime_error("Could not connect to MariaDB database: " + m_connection->error());
+			m_connection = mariadb::connection::create(account);
+			if(!m_connection->connect())
+				throw std::runtime_error("Could not connect to MariaDB database: " + m_connection->error());
 			
 			m_connection->execute("CREATE DATABASE IF NOT EXISTS " + db + ";");
 			m_connection->set_schema(db);
-		  }
+		}
 
-		  void execute(const std::string& file)
-		  {
-		     std::ifstream in(file);
-		     if(!in)
-		     throw std::runtime_error("Could not open SQL script file!");
+		void execute(const std::string& file)
+		{
+			std::ifstream in(file);
+			if(!in)
+			throw std::runtime_error("Could not open SQL script file!");
 
-		     std::stringstream buf;
-		     buf << in.rdbuf();
+			std::stringstream buf;
+			buf << in.rdbuf();
 
-		     if(!m_connection->connected())
-			m_connection->connect();
-			
-		     m_connection->execute(buf.str());
-		  }
+			m_connection->execute(bu
+		     ]] .. MariaDB:generateConnectionGuard() .. [[
+			f.str());
+		}
 
-		  void init(const std::string& db)
-		  {
+		void init(const std::string& db)
+		{
 			// Select database
 			m_connection->execute("USE " + m_connection->schema() + ";");
 			
@@ -252,12 +251,12 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
 
 void drop()
 {
-   m_connection->execute("drop database " + m_connection->schema() + ";");
+	m_connection->execute("drop database " + m_connection->schema() + ";");
 }
 
 void close()
 {
-   m_connection->disconnect();
+	m_connection->disconnect();
 }
 
 void query(const std::string& q)
