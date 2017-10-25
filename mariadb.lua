@@ -217,14 +217,14 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
 		{
 			std::ifstream in(file);
 			if(!in)
-			throw std::runtime_error("Could not open SQL script file!");
+				throw std::runtime_error("Could not open SQL script file!");
 
 			std::stringstream buf;
 			buf << in.rdbuf();
 
-			m_connection->execute(bu
-		     ]] .. MariaDB:generateConnectionGuard() .. [[
-			f.str());
+			]] .. MariaDB:generateConnectionGuard() .. [[
+
+			m_connection->execute(buf.str());
 		}
 
 		void init(const std::string& db)
