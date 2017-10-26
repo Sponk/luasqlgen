@@ -306,7 +306,7 @@ std::string queryJson(const std::string& query, const std::vector<std::string>& 
 			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_string(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
                                 break;
                                 case mariadb::value::unsigned8:
-			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_unsigned8(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+			                ss << "\"" << result->column_name(i) << "\" : \"" << static_cast<unsigned short>(result->get_unsigned8(i)) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
                                 break;
                                 case mariadb::value::unsigned16:
 			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_unsigned16(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
@@ -318,7 +318,7 @@ std::string queryJson(const std::string& query, const std::vector<std::string>& 
 			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_unsigned64(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
                                 break;
                                 case mariadb::value::signed8:
-			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_signed8(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+			                ss << "\"" << result->column_name(i) << "\" : \"" << static_cast<short>(result->get_signed8(i)) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
                                 break;
                                 case mariadb::value::signed16:
 			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_signed16(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
