@@ -303,7 +303,7 @@ std::string queryJson(const std::string& query, const std::vector<std::string>& 
                         switch(result->column_type(i))
                         {
                                 case mariadb::value::string:
-			                ss << "\"" << result->column_name(i) << "\" : \"" << result->get_string(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+			                ss << "\"" << result->column_name(i) << "\" : \"" << jsonEscape(result->get_string(i)) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
                                 break;
                                 case mariadb::value::unsigned8:
 			                ss << "\"" << result->column_name(i) << "\" : \"" << static_cast<unsigned short>(result->get_unsigned8(i)) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
@@ -337,7 +337,7 @@ std::string queryJson(const std::string& query, const std::vector<std::string>& 
                                 break;
 
                                case mariadb::value::blob:
-                                        ss << "\"" << result->column_name(i) << "\" : \"" << result->get_string(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+                                        ss << "\"" << result->column_name(i) << "\" : \"" << jsonEscape(result->get_string(i)) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
                                break;
 
                                 default: throw std::runtime_error(std::string("Received unknown type from MariaDB! (") 

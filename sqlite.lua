@@ -303,7 +303,7 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 					for (size_t i = 0; i < colnum; i++)
 					{
 						const char* coltext = (const char*) sqlite3_column_text(stmt, i);
-						ss << "\"" << sqlite3_column_name(stmt, i) << "\" : \"" << (coltext ? coltext : "") << (i == colnum - 1 ? "\"\n" : "\",\n");
+						ss << "\"" << sqlite3_column_name(stmt, i) << "\" : \"" << (coltext ? jsonEscape(coltext) : "") << (i == colnum - 1 ? "\"\n" : "\",\n");
 					}
 					
 					ss << "},\n";
