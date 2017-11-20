@@ -48,7 +48,7 @@ function SQLite:generateConnectionGuard()
 end
 
 function SQLite:generateStatement(name)
-   return "sqlite3_stmt* " .. name .. ";"
+   return "sqlite3_stmt* " .. name .. " = nullptr;"
 end
 
 function SQLite:setStatementArg(name, idx, varname, typedef)
@@ -184,7 +184,8 @@ namespace ]] .. description.name .. "\n{\n")
               .. "\n{\npublic:\n\t" .. description.name  ..
 	 [[
 SQLite(const std::string& db, const std::string& host, const std::string& name,
-				const std::string& password, const unsigned short port)
+				const std::string& password, const unsigned short port) :
+		m_database(nullptr)
 	{
     	connect(db, host, name, password, port);
     }
@@ -193,7 +194,7 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 ]])
 
    -- Empty default constructor
-   file:write("\t" .. description.name .. "SQLite() {}\n\n")
+   file:write("\t" .. description.name .. "SQLite() : m_database(nullptr) {}\n\n")
 
    file:write("\t~" .. description.name .. "SQLite()\n\t{\n")
    file:write([[
