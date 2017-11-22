@@ -213,29 +213,29 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
    end
   
    file:write([[
-
-		  void connect(const std::string& db, const std::string&,
-			       const std::string&, const std::string&, const unsigned short)
-		  {
-		     //sqlite3_shutdown();
-		     //if(sqlite3_config(SQLITE_CONFIG_SERIALIZED) != SQLITE_OK)
-		     //throw std::runtime_error(std::string("Could not configure thread safety: ") +
-		//			      sqlite3_errmsg(m_database));
+		void connect(const std::string& db, const std::string&,
+				const std::string&, const std::string&, const unsigned short)
+		{
+			//sqlite3_shutdown();
+			//if(sqlite3_config(SQLITE_CONFIG_SERIALIZED) != SQLITE_OK)
+			//throw std::runtime_error(std::string("Could not configure thread safety: ") +
+			//			      sqlite3_errmsg(m_database));
 		     
-		  //   sqlite3_initialize();
-		     if(db != ":memory:")
-			m_databaseName = db + ".db";
-		     else
+			//   sqlite3_initialize();
+			if(db != ":memory:")
+				m_databaseName = db + ".db";
+			else
 			     m_databaseName = ":memory:";
 			     
-		     if (sqlite3_open(m_databaseName.c_str(), &m_database))
-		     throw std::runtime_error(std::string("Could not open database: ") +
+			if (sqlite3_open(m_databaseName.c_str(), &m_database))
+				throw std::runtime_error(std::string("Could not open database: ") +
 					      sqlite3_errmsg(m_database));
 		     
-		     if(sqlite3_threadsafe() == 0)
-		     std::cerr << "SQlite is not compiled as thread safe!" << std::endl;
+			if(sqlite3_threadsafe() == 0)
+				std::cerr << "SQlite is not compiled as thread safe!" << std::endl;
 
-		     query("PRAGMA journal_mode=WAL");
+			sqlite3_busy_timeout(m_database, 1000);
+			query("PRAGMA journal_mode=WAL");
 		  }
 
 		  void execute(const std::string& file)
