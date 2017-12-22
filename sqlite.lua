@@ -253,7 +253,6 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 		  std::string queryJson(const std::string& query) override
 		  {
 			std::stringstream ss;
-			ss << "[\n";
 			const auto callback = [](void* data, int argc, char** argv,
 									char** colName) {
 				std::stringstream* selection =
@@ -261,7 +260,7 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 
 				(*selection) << "{\n";
 				for (int i = 0; i < argc; i++)
-					(*selection) << "\"" << colName[i] << "\" : \"" << (argv[i] ? argv[i] : "") << (i == argc - 1 ? "\"\n" : "\",\n");
+					(*selection) << "\"" << colName[i] << "\" : \"" << (argv[i] ? jsonEscape(argv[i]) : "") << (i == argc - 1 ? "\"\n" : "\",\n");
 				
 				(*selection) << "},\n";
 				return 0;
@@ -273,8 +272,10 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
 										error);
 			
 			std::string result = ss.str();
-			result.erase(result.end() - 2);
-			return result + "]\n";
+			if(!result.empty())
+				result.erase(result.end() - 2);
+			
+			return "[\n" + result + "]\n";
 
 		  }
 		  
