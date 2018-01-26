@@ -188,12 +188,12 @@ namespace ]] .. description.name .. "\n{\n")
       "\n\nclass " .. description.name .. "SQLite : public " .. description.name .. "Abstract"
               .. "\n{\npublic:\n\t" .. description.name  ..
 	 [[
-SQLite(const std::string& db, const std::string& host, const std::string& name,
+SQLite(const std::string& db, const std::string& host, const std::string& name, const std::string& socket,
 				const std::string& password, const unsigned short port) :
 		m_database(nullptr)
 	{
-    	connect(db, host, name, password, port);
-    }
+		connect(db, host, socket, name, password, port);
+	}
 
    const std::string dbFile = "]] .. description.name .. [[SQLite.sql";
 ]])
@@ -218,7 +218,7 @@ SQLite(const std::string& db, const std::string& host, const std::string& name,
    end
   
    file:write([[
-		void connect(const std::string& db, const std::string&,
+		void connect(const std::string& db, const std::string&, const std::string&,
 				const std::string&, const std::string&, const unsigned short)
 		{
 			//sqlite3_shutdown();

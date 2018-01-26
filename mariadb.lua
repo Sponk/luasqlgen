@@ -173,11 +173,11 @@ namespace ]] .. description.name ..
       "\n\nclass " .. description.name .. "MariaDB : public " .. description.name .. "Abstract"
               .. "\n{\npublic:\n\t" .. description.name  ..
 	 [[
-MariaDB(const std::string& db, const std::string& host, const std::string& name,
+MariaDB(const std::string& db, const std::string& host, const std::string& socket, const std::string& name,
 				const std::string& password, const unsigned short port)
 	{
-    	connect(db, host, name, password, port);
-    }
+		connect(db, host, socket, name, password, port);
+	}
 
    const std::string dbFile = "]] .. description.name .. [[MariaDB.sql";
 
@@ -204,10 +204,10 @@ MariaDB(const std::string& db, const std::string& host, const std::string& name,
   
    file:write([[
 
-		void connect(const std::string& db, const std::string& host,
+		void connect(const std::string& db, const std::string& host, const std::string& socket,
 			       const std::string& name, const std::string& password, const unsigned short port)
 		{
-			mariadb::account_ref account = mariadb::account::create(host, name, password, "", port);
+			mariadb::account_ref account = mariadb::account::create(host, name, password, "", port, socket);
 			account->set_auto_commit(true);
 
 			m_connection = mariadb::connection::create(account);
