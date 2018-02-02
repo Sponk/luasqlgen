@@ -63,7 +63,8 @@ end
 
 function MariaDB:generateConnectionGuard()
    return [[if(!m_connection->connected()) 
-		{ 
+		{
+			m_connection->disconnect();
 			m_connection->connect(); 
 			m_connection->set_auto_commit(true); 
 			init(m_connection->schema());
@@ -112,7 +113,7 @@ function MariaDB:beginStatement(name)
 end
 
 function MariaDB:endStatement(name)
-   return "); " .. name .. "->set_connection(m_connection);\n"
+   return ");\n"
 end
 
 function MariaDB:generateStmtReset(name)
