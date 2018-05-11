@@ -244,17 +244,31 @@ MariaDB(const std::string& db, const std::string& host, const std::string& socke
 
 	       ]])
 
-   for k,v in orderedPairs(tables) do
-      common:generateCreateStmt(self, file, k, v)
-      common:generateUpdateStmt(self, file, k, v)
-      common:generateDeleteStmt(self, file, k, v)
-      common:generateQueryStmt(self, file, k, v)
-      common:generateGetStmt(self, file, k, v)
-      common:generateSearchStmt(self, file, k, v)
-   end
-
-   file:write([[	}
-
+	for k,v in orderedPairs(tables) do
+		common:generateCreateStmt(self, file, k, v)
+		common:generateUpdateStmt(self, file, k, v)
+		common:generateDeleteStmt(self, file, k, v)
+		common:generateQueryStmt(self, file, k, v)
+		common:generateGetStmt(self, file, k, v)
+		common:generateSearchStmt(self, file, k, v)
+	end
+	file:write("\t}")
+	
+	file:write("void dropTables()\n{\n")
+	for k,v in orderedPairs(tables) do
+		file:write("m_connection->execute(\"drop table " .. k .. ";\");")
+	end
+	file:write("m_connection->execute(\"drop table DBInfo;\");");
+	file:write("}\n")
+	
+	file:write("void clearTables()\n{\n")
+	for k,v in orderedPairs(tables) do
+		file:write("m_connection->execute(\"delete from " .. k .. ";\");")
+		file:write("m_connection->execute(\"alter table " .. k .. " AUTO_INCREMENT=1;\");")
+	end
+	file:write("}\n")
+	
+	file:write([[
 void drop()
 {
 	m_connection->execute("drop database " + m_connection->schema() + ";");

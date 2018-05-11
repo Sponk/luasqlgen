@@ -339,22 +339,37 @@ SQLite(const std::string& db, const std::string& host, const std::string& name, 
 		  
 		  void init(const std::string& db)
 		  {
-		     // Check if tables exist or not
+			// Check if tables exist or not
 			if(!tableExists("DBInfo"))
-		     execute(db);
+				execute(db);
 
 	       ]])
 
-   for k,v in orderedPairs(tables) do
-      common:generateCreateStmt(self, file, k, v)
-      common:generateUpdateStmt(self, file, k, v)
-      common:generateDeleteStmt(self, file, k, v)
-      common:generateQueryStmt(self, file, k, v)
-      common:generateGetStmt(self, file, k, v)
-      common:generateSearchStmt(self, file, k, v)
-   end
+	for k,v in orderedPairs(tables) do
+		common:generateCreateStmt(self, file, k, v)
+		common:generateUpdateStmt(self, file, k, v)
+		common:generateDeleteStmt(self, file, k, v)
+		common:generateQueryStmt(self, file, k, v)
+		common:generateGetStmt(self, file, k, v)
+		common:generateSearchStmt(self, file, k, v)
+	end
+	file:write("\t}\n")
 
-   file:write([[	}
+	file:write("void dropTables()\n{\n")
+	for k,v in orderedPairs(tables) do
+		file:write("query(\"drop table " .. k .. ";\");")
+	end
+	file:write("query(\"drop table DBInfo;\");");
+	file:write("}\n")
+	
+	file:write("void clearTables()\n{\n")
+	for k,v in orderedPairs(tables) do
+		file:write("query(\"delete from " .. k .. ";\");")
+		file:write("query(\"update sqlite_sequence set seq = 1 where name='" .. k .. "';\");")
+	end
+	file:write("}\n")
+   
+	file:write([[
 
 void drop()
 {
