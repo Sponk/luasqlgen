@@ -184,8 +184,8 @@ class SQLiteConnection : public DatabaseConnection
 public:
 	~SQLiteConnection() { close(); }
 	
-	void connect(const std::string& db, const std::string& host = "", const std::string& socket = "",
-			       const std::string& name = "", const std::string& password = "", const unsigned short port = 0) override
+	void connect(const std::string& db, const std::string&, const std::string&,
+			       const std::string&, const std::string&, const unsigned short) override
 	{
 		//sqlite3_shutdown();
 		//if(sqlite3_config(SQLITE_CONFIG_SERIALIZED) != SQLITE_OK)
@@ -207,6 +207,11 @@ public:
 
 		sqlite3_busy_timeout(m_database, 1000);
 		query("PRAGMA journal_mode=WAL");
+	}
+	
+	void connect(const std::string& db)
+	{
+		connect(db, "", "", "", "", 0);
 	}
 	
 	std::shared_ptr<PreparedStmt> getStatement(const std::string& source) override

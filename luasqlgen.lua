@@ -374,7 +374,7 @@ testfile:close()
 -- Plantuml
 --
 
-local pumlfile = io.open(description.name .. "Design.puml", "w")
+local pumlfile = io.open(description.name .. ".puml", "w")
 
 pumlfile:write("@startuml\n\n")
 for k,v in orderedPairs(tables) do
