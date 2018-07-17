@@ -198,14 +198,32 @@ if description.scripts ~= nil then
 		
 		slashLocStart = slashLocStart or file:len() + 2
 		slashLocStart = file:len() - slashLocStart + 2
-		
-		structfile:write("\tvirtual std::string " .. file:sub(slashLocStart, file:find(".sql") - 1) .. "(const std::vector<std::string>& args)\n")
-		structfile:write(
-[[
-	{
-		return m_connection->queryJson("]] .. sources:escape() .. [[", args);
-	}
-]])
+
+		structfile:write("\tvirtual std::string " .. file:sub(slashLocStart, file:find(".sql") - 1) .. "(const std::vector<std::string>& args)\n\t{\n")
+		local lines = {}
+		for match in sources:gmatch("(.-);") do
+			table.insert(lines, "m_connection->queryJson(\"" .. match:escape() .. "\", args);\n");
+		end
+
+		for k, v in ipairs(lines) do
+			if k == #lines then
+				structfile:write("\t\treturn " .. v)
+			else
+				structfile:write("\t\t" .. v)
+			end
+		end
+		structfile:write("\t}\n\n")
+
+		structfile:write("\tvirtual void " .. file:sub(slashLocStart, file:find(".sql") - 1) .. "(const std::vector<std::string>& args, luasqlgen::DatabaseResult& result)\n\t{\n")
+		structfile:write("\t\tm_connection->query(\"" .. sources:escape() .. "\", args, result);\n");
+		structfile:write("\t}\n\n")
+
+		-- structfile:write(
+--
+--	{
+--		return m_connection->queryJson(" .. sources:escape() .. [[", args);
+--	}
+--)
 	end
 end
 

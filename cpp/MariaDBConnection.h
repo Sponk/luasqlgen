@@ -48,6 +48,11 @@ class MariaDBStmt : public PreparedStmt
 			case mariadb::value::float32:
 				ss << "\"" << result->column_name(i) << "\" : \"" << result->get_float(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
 			break;
+			
+			case mariadb::value::decimal:
+				ss << "\"" << result->column_name(i) << "\" : \"" << result->get_decimal(i).double64() << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
+			break;
+			
 			case mariadb::value::double64:
 				ss << "\"" << result->column_name(i) << "\" : \"" << result->get_double(i) << (i == result->column_count() - 1 ? "\"\n" : "\",\n");
 			break;
@@ -64,12 +69,15 @@ class MariaDBStmt : public PreparedStmt
 	
 	std::string toString(const mariadb::result_set_ref& result, size_t i)
 	{
+		if(result->get_is_null(i)) return "";
+		
 		switch(result->column_type(i))
 		{
+			case mariadb::value::null:
+				return "";
 			case mariadb::value::blob:
 			case mariadb::value::string:
 				return result->get_string(i);
-			break;
 			case mariadb::value::unsigned8:
 				return std::to_string(static_cast<unsigned short>(result->get_unsigned8(i)));
 			case mariadb::value::unsigned16:
@@ -90,7 +98,9 @@ class MariaDBStmt : public PreparedStmt
 				return std::to_string(result->get_float(i));
 			case mariadb::value::double64:
 				return std::to_string(result->get_double(i));
-
+			case mariadb::value::decimal:
+				return std::to_string(result->get_decimal(i).double64());
+			
 			default: throw std::runtime_error(std::string("Received unknown type from MariaDB! (") 
 				+ result->column_name(i) + " is "
 				+ std::to_string(result->column_type(i)) + ")");

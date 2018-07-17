@@ -143,7 +143,11 @@ public:
 				std::unordered_map<std::string, std::string> row;
 				for (size_t i = 0; i < colnum; i++)
 				{
-					row[sqlite3_column_name(m_stmt, i)] = reinterpret_cast<const char*>(sqlite3_column_text(m_stmt, i));
+					auto name = sqlite3_column_name(m_stmt, i);
+					if(sqlite3_column_type(m_stmt, i) != SQLITE_NULL)
+						row[name] = reinterpret_cast<const char*>(sqlite3_column_text(m_stmt, i));
+					else
+						row[name] = "";
 				}
 				result.push_back(std::move(row));
 			}
