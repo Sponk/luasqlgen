@@ -12,7 +12,8 @@
 namespace luasqlgen
 {
 
-typedef std::vector<std::unordered_map<std::string, std::string>> DatabaseResult;
+typedef std::unordered_map<std::string, std::string> ResultLine;
+typedef std::vector<ResultLine> DatabaseResult;
 
 class DatabaseConnection;
 class PreparedStmt
