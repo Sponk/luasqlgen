@@ -72,6 +72,10 @@ function string:escape()
 				:gsub('\t', "\\t")
 end
 
+local cpptypes = {
+	string = true, double = true, float = true, bool = true, int = true, uint = true, uint64 = true
+}
+
 local sql = dofile(scriptPath() .. "/sql.lua")
 local basePath = arg[1]:sub(0, arg[1]:len() - arg[1]:reverse():find("/"))
 local description = dofile(arg[1])
@@ -109,27 +113,28 @@ for k,v in orderedPairs(tables) do
 
 	local toJsonString = ""
 	for p,q in orderedPairs(v) do
+		if q == "string" then
+			toJsonString = toJsonString .. "\t\t" .. [[ss << "\"]] .. p .. [[\" : \"" << luasqlgen::PreparedStmt::jsonEscape(]] .. p .. ") << \"\\\",\" << std::endl;\n";
+		else
+			toJsonString = toJsonString .. "\t\t" .. [[ss << "\"]] .. p .. [[\" : \"" << ]] .. p .. " << \"\\\",\" << std::endl;\n";
+		end
 
-	if q == "string" then
-		toJsonString = toJsonString .. "\t\t" .. [[ss << "\"]] .. p .. [[\" : \"" << luasqlgen::PreparedStmt::jsonEscape(]] .. p .. ") << \"\\\",\" << std::endl;\n";
-	else
-		toJsonString = toJsonString .. "\t\t" .. [[ss << "\"]] .. p .. [[\" : \"" << ]] .. p .. " << \"\\\",\" << std::endl;\n";
+		-- C++
+		-- Write into struct
+		if tables[q] ~= nil then
+			if p ~= q then
+				structfile:write("\tunsigned int " .. p .. " = 0;\n")
+			end
+		else
+			 if q ~= "string" and cpptypes[q] then -- If we have a C++ basic type that is no string
+				structfile:write("\t" .. q .. " " .. p .. " = 0;\n")
+			 elseif q == "string" then -- If we have a string
+				structfile:write("\t" .. q .. " " .. p .. ";\n")
+			 else -- If we have a non-existing custom type (e.g. reference to table from another module)
+				 structfile:write("\tunsigned long long " .. p .. ";\n")
+			 end
+		end
 	end
-
-	-- C++
-	-- Write into struct
-	if tables[q] ~= nil then
-	 if p ~= q then
-	    structfile:write("\tunsigned int " .. p .. " = 0;\n")
-	 end
-      else
-	 if q ~= "string" then
-	    structfile:write("\t" .. q .. " " .. p .. " = 0;\n")
-	 else
-	    structfile:write("\t" .. q .. " " .. p .. ";\n")
-	 end
-      end
-   end
 
    structfile:write("\n\tvoid validate()\n\t{\n")
    structfile:write("\t\t// Integrity check\n")
