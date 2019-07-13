@@ -289,6 +289,7 @@ public:
 	}
 	
 	const char* getName() const override { return "SQLite"; }
+	DBTYPE getType() const override { return SQLITE; }
 };
 
 }

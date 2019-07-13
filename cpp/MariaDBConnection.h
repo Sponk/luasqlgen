@@ -303,6 +303,7 @@ public:
 	}
 	
 	const char* getName() const override { return "MariaDB"; }
+	DBTYPE getType() const override { return MARIADB; }
 };
 
 }

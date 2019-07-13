@@ -12,6 +12,13 @@
 namespace luasqlgen
 {
 
+enum DBTYPE
+{
+	SQLITE = 0,
+	MARIADB,
+	ODBC
+};
+
 typedef std::unordered_map<std::string, std::string> ResultLine;
 typedef std::vector<ResultLine> DatabaseResult;
 
@@ -87,6 +94,7 @@ public:
 	virtual std::shared_ptr<PreparedStmt> getStatement(const std::string& source) = 0;
 	virtual unsigned long long getLastInsertID() = 0;
 	virtual const char* getName() const = 0;
+	virtual DBTYPE getType() const = 0;
 };
 
 }
