@@ -193,7 +193,7 @@ function SQL:generateCreateStmt(file, name, tbl)
 end
 
 function SQL:generateUpdateStmt(file, name, tbl)
-   file:write("\"update `" .. name .. "` set\"\n")
+   file:write("\"update `" .. name .. "` set \"\n")
 
    local size = 0
    for p,q in orderedPairs(tbl) do

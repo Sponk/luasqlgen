@@ -5,6 +5,10 @@
 #include <exception>
 #include <unordered_map>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include <sql.h>
 #include <sqltypes.h>
 #include <sqlext.h>
@@ -213,14 +217,20 @@ public:
 	{
 		m_stmtCache.clear();
 		
+		SQLRETURN ret;
 		if(m_db)
 		{
-			SQLDisconnect(m_sql);
+			ret = SQLDisconnect(m_db);
+			if (!SQL_SUCCEEDED(ret))
+				throwODBCError("Could not disconnect from database: ", m_sql, m_db);
+
 			SQLFreeHandle(SQL_HANDLE_DBC, m_db);
 		}
 		
-		if(m_sql)
+		if (m_sql)
+		{
 			SQLFreeHandle(SQL_HANDLE_ENV, m_sql);
+		}
 	}
 	
 	void connect(const std::string& db, const std::string& host, const std::string& socket,
@@ -237,9 +247,16 @@ public:
 			connectionStr += "UID=" + name + ";PWD=" + password + ";";
 		
 		ret = SQLDriverConnect(m_db, nullptr, (unsigned char*) connectionStr.c_str(), SQL_NTS, nullptr, 0, nullptr, SQL_DRIVER_COMPLETE);
-		
+				
 		if(!SQL_SUCCEEDED(ret))
 			throwODBCError("Could not connect to database: ", m_sql, m_db);
+
+		// TODO Make optional!
+		// SQLSetConnectOption(m_db, SQL_AUTOCOMMIT, SQL_AUTOCOMMIT_ON);
+		ret = SQLSetConnectAttr(m_db, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)TRUE, 0);
+
+		if (!SQL_SUCCEEDED(ret))
+			throwODBCError("Could not enable auto commit: ", m_sql, m_db);
 	}
 	
 	std::shared_ptr<PreparedStmt> getStatement(const std::string& source) override
@@ -318,7 +335,7 @@ public:
 	
 	unsigned long long getLastInsertID() override
 	{
-
+		return 0;
 	}
 	
 	const char* getName() const override { return "ODBC"; }
