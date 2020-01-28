@@ -253,7 +253,7 @@ public:
 
 		// TODO Make optional!
 		// SQLSetConnectOption(m_db, SQL_AUTOCOMMIT, SQL_AUTOCOMMIT_ON);
-		ret = SQLSetConnectAttr(m_db, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)TRUE, 0);
+		ret = SQLSetConnectAttr(m_db, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) true, 0);
 
 		if (!SQL_SUCCEEDED(ret))
 			throwODBCError("Could not enable auto commit: ", m_sql, m_db);
