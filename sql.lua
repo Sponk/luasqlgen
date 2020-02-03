@@ -85,6 +85,8 @@ function SQL:generateGetFunction(file, name, tbl)
 			file:write("\t\tobject." .. p .. " = std::stof(row[\"" .. p .. "\"]);\n")
 		elseif q == "double" then
 			file:write("\t\tobject." .. p .. " = std::stod(row[\"" .. p .. "\"]);\n")
+		else
+			file:write("\t\tobject." .. p .. " = std::stoll(row[\"" .. p .. "\"]);\n")
 		end
 	end
 
